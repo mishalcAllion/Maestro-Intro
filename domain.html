@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Knowledge -- Maestro KT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <script src="data.js"></script>
+  <script>window.CURRENT_PAGE = 'domain';</script>
+  <script src="nav.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    @media print { #sidebar, #nav-toggle, #nav-overlay { display: none !important; } main { margin-left: 0 !important; } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen antialiased">
+  <div id="nav-root"></div>
+  <main class="ml-0 lg:ml-[260px] min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 py-8 lg:px-10">
+
+      <div id="h1"></div>
+      <script>document.getElementById('h1').innerHTML = Theme.heading('Domain Knowledge', 'Luxury travel and points optimization -- the business Maestro serves');</script>
+
+      <!-- Revenue vs Award -->
+      <div id="h2"></div>
+      <script>document.getElementById('h2').innerHTML = Theme.heading('Revenue vs Award Tickets');</script>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" id="rev-vs-award"></div>
+      <div class="bg-maestro/5 border border-maestro/20 rounded-lg p-4 mb-8">
+        <div class="text-maestro text-xs font-semibold mb-1">Why This Matters for Maestro</div>
+        <div class="text-slate-400 text-sm" id="why-matters"></div>
+      </div>
+      <script>
+        const d = DATA.domain;
+        document.getElementById('rev-vs-award').innerHTML = [d.revenueVsAward.revenue, d.revenueVsAward.award].map(t => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+            <h3 class="text-slate-100 font-semibold text-sm mb-3">${t.label}</h3>
+            <ul class="text-slate-400 text-sm space-y-1.5">${t.points.map(p => `<li class="flex items-start gap-2"><span class="text-maestro">-</span>${p}</li>`).join('')}</ul>
+          </div>`).join('');
+        document.getElementById('why-matters').textContent = d.revenueVsAward.whyItMatters;
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- CPM -->
+      <div id="h3"></div>
+      <script>document.getElementById('h3').innerHTML = Theme.heading('CPM: The North Star Metric', 'Cents Per Mile -- how we measure redemption value');</script>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-4">
+        <div class="font-mono text-sm text-slate-300 mb-3" id="cpm-formula"></div>
+        <div class="bg-slate-800 rounded p-3 text-sm text-slate-400" id="cpm-example"></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="cpm-table"></div>
+      <script>
+        document.getElementById('cpm-formula').textContent = d.cpm.formula;
+        const ex = d.cpm.example;
+        document.getElementById('cpm-example').innerHTML = `Example: Cash price $${ex.cashPrice.toLocaleString()} / ${ex.points.toLocaleString()} points = <span class="text-maestro font-semibold">${ex.cpm}c per mile</span>`;
+        document.getElementById('cpm-table').innerHTML = Theme.table(
+          ['Redemption Type', 'Typical CPM', 'Sentiment'],
+          d.cpm.benchmarks.map(b => [b.type, b.cpm, b.sentiment]),
+          { highlightFn: (row) => row[2] === 'Excellent value' ? 'bg-green-500/5' : '' }
+        );
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Transfer Partners -->
+      <div id="h4"></div>
+      <script>document.getElementById('h4').innerHTML = Theme.heading('Transfer Partners', 'Why transferring points beats booking through portals');</script>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-4">
+        <p class="text-slate-400 text-sm mb-4" id="tp-desc"></p>
+        <div id="tp-table"></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-8">
+        <h4 class="text-slate-100 text-sm font-semibold mb-3">Key Advantages of Transferring</h4>
+        <ul class="text-slate-400 text-sm space-y-1.5" id="tp-advantages"></ul>
+      </div>
+      <script>
+        document.getElementById('tp-desc').textContent = d.transferPartners.description;
+        document.getElementById('tp-table').innerHTML = Theme.table(
+          ['Booking Method', 'CPM Value', 'Flexibility'],
+          d.transferPartners.comparison.map(c => [c.method, c.cpm, c.flexibility])
+        );
+        document.getElementById('tp-advantages').innerHTML = d.transferPartners.keyAdvantages.map(a => `<li class="flex items-start gap-2"><span class="text-maestro">-</span>${a}</li>`).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Phantom & Married Segments -->
+      <div id="h5"></div>
+      <script>document.getElementById('h5').innerHTML = Theme.heading('The Inventory Problem');</script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+          <h3 class="text-slate-100 font-semibold text-sm mb-2">Phantom Availability</h3>
+          <p class="text-slate-400 text-sm mb-3" id="phantom-def"></p>
+          <div class="text-slate-500 text-xs mb-2">Common causes:</div>
+          <ul class="text-slate-400 text-sm space-y-1" id="phantom-causes"></ul>
+          <div class="mt-3 bg-red-500/5 border border-red-500/20 rounded p-2 text-xs text-red-400" id="phantom-risk"></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+          <h3 class="text-slate-100 font-semibold text-sm mb-2">Married Segments</h3>
+          <p class="text-slate-400 text-sm mb-3" id="married-def"></p>
+          <div class="bg-slate-800 rounded p-3 text-xs text-slate-400 mb-3" id="married-example"></div>
+          <div class="text-slate-500 text-xs" id="married-tech"></div>
+        </div>
+      </div>
+      <script>
+        document.getElementById('phantom-def').textContent = d.phantomAvailability.definition;
+        document.getElementById('phantom-causes').innerHTML = d.phantomAvailability.causes.map(c => `<li class="flex items-start gap-2"><span class="text-red-400">-</span>${c}</li>`).join('');
+        document.getElementById('phantom-risk').textContent = 'Mitigation: ' + d.phantomAvailability.mitigation;
+        document.getElementById('married-def').textContent = d.marriedSegments.definition;
+        document.getElementById('married-example').textContent = d.marriedSegments.example;
+        document.getElementById('married-tech').textContent = d.marriedSegments.technicalImplication;
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Competitors -->
+      <div id="h6"></div>
+      <script>document.getElementById('h6').innerHTML = Theme.heading('Competitive Landscape');</script>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" id="competitor-cards"></div>
+      <script>
+        document.getElementById('competitor-cards').innerHTML = DATA.domain.competitors.map(c => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+            <h3 class="text-slate-100 font-semibold text-sm mb-0.5">${c.name}</h3>
+            <div class="text-slate-500 text-xs mb-1">${c.type} -- ${c.price}</div>
+            <div class="text-green-400 text-xs mt-3 mb-1">Strengths:</div>
+            <ul class="text-slate-400 text-xs space-y-0.5">${c.strengths.map(s => `<li>+ ${s}</li>`).join('')}</ul>
+            <div class="text-red-400 text-xs mt-2 mb-1">Weaknesses:</div>
+            <ul class="text-slate-400 text-xs space-y-0.5">${c.weaknesses.map(w => `<li>- ${w}</li>`).join('')}</ul>
+          </div>
+        `).join('');
+      </script>
+
+      <div class="bg-maestro/5 border border-maestro/20 rounded-lg p-5 mb-4">
+        <div class="text-maestro text-sm font-semibold mb-2">Where Maestro Fits</div>
+        <div class="text-slate-400 text-sm" id="maestro-pos"></div>
+      </div>
+      <script>document.getElementById('maestro-pos').textContent = DATA.domain.maestroPosition;</script>
+
+      <!-- Comparison Matrix -->
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="matrix-table"></div>
+      <script>
+        const ms = (v) => v === true ? '<span class="text-green-400">Yes</span>' : v === false ? '<span class="text-red-400">No</span>' : '<span class="text-amber-400">Partial</span>';
+        document.getElementById('matrix-table').innerHTML = Theme.table(
+          ['User Need', 'Point.me', 'Velocity Black', 'Maestro'],
+          DATA.domain.competitorMatrix.map(r => [r.need, ms(r.pointMe), ms(r.velocityBlack), ms(r.maestro)])
+        );
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Success Metrics -->
+      <div id="h7"></div>
+      <script>document.getElementById('h7').innerHTML = Theme.heading('Success Metrics');</script>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" id="metrics-grid"></div>
+      <script>
+        document.getElementById('metrics-grid').innerHTML = DATA.domain.successMetrics.map(m => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 text-center">
+            <div class="text-maestro text-lg font-bold font-display">${m.target}</div>
+            <div class="text-slate-300 text-xs font-medium mt-1">${m.metric}</div>
+            <div class="text-slate-500 text-[10px] mt-0.5">${m.description}</div>
+          </div>
+        `).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Glossary -->
+      <div id="h8"></div>
+      <script>document.getElementById('h8').innerHTML = Theme.heading('Glossary', 'Key terms you\'ll encounter working on Maestro');</script>
+      <div class="space-y-2 mb-8" id="glossary"></div>
+      <script>
+        document.getElementById('glossary').innerHTML = DATA.domain.glossary.map(g =>
+          Theme.collapsible(
+            `<span class="font-mono text-maestro mr-2">${g.term}</span> <span class="text-slate-400">${g.full}</span>`,
+            g.definition
+          )
+        ).join('');
+      </script>
+
+    </div>
+  </main>
+</body>
+</html>

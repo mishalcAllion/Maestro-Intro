@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Current State -- Maestro KT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <script src="data.js"></script>
+  <script>window.CURRENT_PAGE = 'roadmap';</script>
+  <script src="nav.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    @media print { #sidebar, #nav-toggle, #nav-overlay { display: none !important; } main { margin-left: 0 !important; } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen antialiased">
+  <div id="nav-root"></div>
+  <main class="ml-0 lg:ml-[260px] min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 py-8 lg:px-10">
+
+      <div id="h1"></div>
+      <script>document.getElementById('h1').innerHTML = Theme.heading('Current State & Direction', 'Where the team is, what we\'re building, and where you fit in');</script>
+
+      <!-- Challenges -->
+      <div id="h2"></div>
+      <script>document.getElementById('h2').innerHTML = Theme.heading('Current Challenges', 'What the team is dealing with right now');</script>
+
+      <div class="space-y-4 mb-8" id="challenges"></div>
+      <script>
+        const cColors = { 'Being addressed': 'amber', 'Active monitoring': 'red', 'Process improvements underway': 'blue' };
+        document.getElementById('challenges').innerHTML = DATA.challenges.map(c => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="text-slate-100 font-semibold text-sm">${c.title}</h3>
+              ${Theme.badge(c.status, cColors[c.status] || 'slate')}
+            </div>
+            <p class="text-slate-400 text-sm mb-3">${c.description}</p>
+            <div class="text-slate-500 text-xs mb-1">Impact:</div>
+            <ul class="text-slate-400 text-xs space-y-0.5">${c.impact.map(i => `<li class="flex items-start gap-2"><span class="text-amber-400">-</span>${i}</li>`).join('')}</ul>
+          </div>
+        `).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- H1 Philosophy -->
+      <div id="h3"></div>
+      <script>document.getElementById('h3').innerHTML = Theme.heading('H1 2026 Philosophy');</script>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-4">
+        <p class="text-slate-300 text-sm" id="h1-approach"></p>
+      </div>
+      <script>document.getElementById('h1-approach').textContent = DATA.h1Philosophy.approach;</script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" id="product-lines"></div>
+      <script>
+        document.getElementById('product-lines').innerHTML = DATA.h1Philosophy.productLines.map(p => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="text-slate-100 font-semibold text-sm">${p.name}</h3>
+              ${Theme.badge(p.automation, p.automation.includes('70') ? 'green' : 'purple')}
+            </div>
+            <p class="text-slate-400 text-xs">${p.description}</p>
+          </div>
+        `).join('');
+      </script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8" id="principles"></div>
+      <script>
+        document.getElementById('principles').innerHTML = DATA.h1Philosophy.principles.map(p => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+            <div class="text-maestro text-xs font-semibold mb-1">${p.name}</div>
+            <div class="text-slate-400 text-xs">${p.description}</div>
+          </div>
+        `).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Sprint Process -->
+      <div id="h4"></div>
+      <script>document.getElementById('h4').innerHTML = Theme.heading('Sprint Process Quick Reference');</script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+          <h4 class="text-slate-100 text-sm font-semibold mb-3">Process</h4>
+          <div class="text-slate-400 text-xs space-y-2" id="sprint-info"></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+          <h4 class="text-slate-100 text-sm font-semibold mb-3">Definition of Done</h4>
+          <ul class="text-slate-400 text-xs space-y-1" id="dod"></ul>
+        </div>
+      </div>
+      <script>
+        const sp = DATA.sprintProcess;
+        document.getElementById('sprint-info').innerHTML = `
+          <div><span class="text-slate-500">Estimation:</span> ${sp.estimation}</div>
+          <div><span class="text-slate-500">Cadence:</span> ${sp.cadence}</div>
+          <div><span class="text-slate-500">Reporting:</span> ${sp.reporting}</div>
+          <div><span class="text-slate-500">Baseline:</span> ${sp.baseline}</div>
+          <div><span class="text-slate-500">Tools:</span> ${sp.tools}</div>
+          <div class="mt-2"><span class="text-slate-500">Statuses:</span>
+            <div class="flex flex-wrap gap-1 mt-1">${sp.statuses.map(s => Theme.badge(s, 'slate')).join('')}</div>
+          </div>
+          <div class="mt-2"><span class="text-slate-500">Bug Severity:</span>
+            <div class="flex flex-wrap gap-1 mt-1">${sp.bugSeverity.map(s => Theme.badge(s, s.includes('S1') ? 'red' : s.includes('S2') ? 'amber' : 'blue')).join('')}</div>
+          </div>`;
+        document.getElementById('dod').innerHTML = sp.dod.map(d => `<li class="flex items-start gap-2"><span class="text-green-400">-</span>${d}</li>`).join('');
+      </script>
+
+      <!-- Mobile Phases -->
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="phases-table"></div>
+      <script>
+        document.getElementById('phases-table').innerHTML = Theme.table(
+          ['Phase', 'Timeline', 'Focus'],
+          DATA.h1Philosophy.mobilePhases.map(p => [p.phase, p.timeline, p.focus])
+        );
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Roadmap -->
+      <div id="h5"></div>
+      <script>document.getElementById('h5').innerHTML = Theme.heading('H1 2026 Roadmap', 'Key initiatives and their current status');</script>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="roadmap-table"></div>
+      <script>
+        document.getElementById('roadmap-table').innerHTML = Theme.table(
+          ['Initiative', 'Timeline', 'Team', 'Owner', 'Status'],
+          DATA.roadmapItems.map(r => [
+            r.name,
+            r.timeline,
+            Theme.badge(r.team, r.team === 'Mobile' ? 'green' : r.team === 'Command Center' ? 'blue' : r.team === 'Points' ? 'purple' : 'slate'),
+            r.owner,
+            Theme.badge(r.status, r.status === 'In progress' ? 'amber' : 'slate')
+          ]),
+          { highlightFn: (_, i) => DATA.roadmapItems[i].status === 'In progress' ? 'bg-amber-500/5' : '' }
+        );
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Where You Fit In -->
+      <div id="h6"></div>
+      <script>document.getElementById('h6').innerHTML = Theme.heading('Where You Fit In', 'Your first priorities based on your role');</script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8" id="role-cards"></div>
+      <script>
+        document.getElementById('role-cards').innerHTML = Object.values(DATA.roleCards).map(r => `
+          <div class="bg-slate-900 border border-maestro/20 rounded-lg p-5">
+            <h3 class="text-maestro font-semibold text-sm mb-3">${r.name}</h3>
+            <div class="text-slate-500 text-xs mb-2">First priorities:</div>
+            <ul class="text-slate-400 text-sm space-y-1.5 mb-4">
+              ${r.priorities.map(p => `<li class="flex items-start gap-2"><span class="text-maestro">-</span>${p}</li>`).join('')}
+            </ul>
+            <div class="text-slate-500 text-xs mb-1">Key tools: <span class="text-slate-400">${r.tools}</span></div>
+            <div class="text-slate-500 text-xs">Key contacts: <span class="text-slate-400">${r.keyContacts.join(', ')}</span></div>
+          </div>
+        `).join('');
+      </script>
+
+    </div>
+  </main>
+</body>
+</html>

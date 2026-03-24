@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team & Org -- Maestro KT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <script src="data.js"></script>
+  <script>window.CURRENT_PAGE = 'team';</script>
+  <script src="nav.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    @media print { #sidebar, #nav-toggle, #nav-overlay { display: none !important; } main { margin-left: 0 !important; } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen antialiased">
+  <div id="nav-root"></div>
+  <main class="ml-0 lg:ml-[260px] min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 py-8 lg:px-10">
+
+      <div id="h1"></div>
+      <script>document.getElementById('h1').innerHTML = Theme.heading('Team & Organization', 'Maestro has 30+ people across 5 continents and 6 departments');</script>
+
+      <!-- Departments -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="dept-grid"></div>
+      <script>
+        document.getElementById('dept-grid').innerHTML = DATA.departments.map(d => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+            <h3 class="text-slate-100 font-semibold text-sm mb-1">${d.name}</h3>
+            <div class="text-maestro text-xs mb-2">${d.lead}</div>
+            <div class="text-slate-400 text-xs">${d.focus}</div>
+            <div class="text-slate-600 text-[10px] mt-2">${d.location}</div>
+          </div>
+        `).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Engineering Team -->
+      <div id="h2"></div>
+      <script>document.getElementById('h2').innerHTML = Theme.heading('Engineering Team', 'Your direct team -- 8 engineers + 2 QA');</script>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="eng-table"></div>
+      <script>
+        document.getElementById('eng-table').innerHTML = Theme.table(
+          ['Name', 'Role', 'Focus Area', 'Location', 'TZ', 'Hrs/Week'],
+          DATA.engineeringTeam.map(m => [
+            m.isNew ? `<span class="text-maestro font-semibold">${m.name}</span> ${Theme.badge('NEW', 'maestro')}` : (m.burnoutRisk ? `${m.name} ${Theme.badge('High Load', 'red')}` : m.name),
+            m.role,
+            `<span class="text-xs">${m.focus}</span>`,
+            m.location,
+            `<span class="font-mono text-xs">${m.tz}</span>`,
+            m.hours
+          ]),
+          { highlightFn: (_, i) => DATA.engineeringTeam[i].isNew ? 'bg-maestro/5' : (DATA.engineeringTeam[i].burnoutRisk ? 'bg-red-500/5' : '') }
+        );
+      </script>
+
+      <!-- Team Health Note -->
+      <div class="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 mb-8">
+        <div class="text-amber-400 text-xs font-semibold mb-1">Team Health Note</div>
+        <div class="text-slate-400 text-sm">Sustainable baseline is 40 hrs/week. Current team averages 50-67 hrs/week. Waruna (Canada, mobile UI) at 52-67 hrs/week represents the highest burnout risk. Sprint capacity planning uses the 40hr baseline, not actuals.</div>
+      </div>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Stakeholders -->
+      <div id="h3"></div>
+      <script>document.getElementById('h3').innerHTML = Theme.heading('Key Stakeholders');</script>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8" id="stakeholder-grid"></div>
+      <script>
+        document.getElementById('stakeholder-grid').innerHTML = DATA.stakeholders.map(s => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-slate-100 font-semibold text-sm">${s.name}</span>
+              ${Theme.badge(s.role, 'blue')}
+            </div>
+            <div class="text-slate-500 text-xs mb-1">${s.priority}</div>
+            <div class="text-slate-400 text-xs">${s.expects}</div>
+          </div>
+        `).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Geography -->
+      <div id="h4"></div>
+      <script>document.getElementById('h4').innerHTML = Theme.heading('Team Geography', '5 regions across multiple timezones');</script>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="geo-table"></div>
+      <script>
+        const flags = { US: '\ud83c\uddfa\ud83c\uddf8', PH: '\ud83c\uddf5\ud83c\udded', LK: '\ud83c\uddf1\ud83c\uddf0', CA: '\ud83c\udde8\ud83c\udde6', KE: '\ud83c\uddf0\ud83c\uddea' };
+        document.getElementById('geo-table').innerHTML = Theme.table(
+          ['Region', 'Team', 'People', 'Timezone'],
+          DATA.geography.map(g => [
+            `${flags[g.flag] || ''} ${g.region}`,
+            g.team,
+            `<span class="text-xs">${g.people}</span>`,
+            `<span class="font-mono text-xs">${g.tz}</span>`
+          ])
+        );
+      </script>
+
+      <!-- Communication -->
+      <div id="h5"></div>
+      <script>document.getElementById('h5').innerHTML = Theme.heading('Communication Channels');</script>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+          <h3 class="text-slate-100 font-semibold text-sm mb-2">Slack (Primary)</h3>
+          <div class="text-slate-400 text-xs space-y-1">
+            <div>#ops-coordination -- main ops channel</div>
+            <div>#ta-ops-pod-2 -- sub-team ops pod</div>
+            <div>Engineering-specific channels</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+          <h3 class="text-slate-100 font-semibold text-sm mb-2">Linear (Tasks)</h3>
+          <div class="text-slate-400 text-xs space-y-1">
+            <div>Sprint tracking and estimation</div>
+            <div>1 point = 1 hour</div>
+            <div>Bug labels: S1/S2/S3</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+          <h3 class="text-slate-100 font-semibold text-sm mb-2">Notion (Record)</h3>
+          <div class="text-slate-400 text-xs space-y-1">
+            <div>System of record for everything</div>
+            <div>Trips, SOPs, client profiles</div>
+            <div>PRDs, process docs</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</body>
+</html>

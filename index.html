@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome -- Maestro KT Day 1</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <script src="data.js"></script>
+  <script>window.CURRENT_PAGE = 'welcome';</script>
+  <script src="nav.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    @media print { #sidebar, #nav-toggle, #nav-overlay { display: none !important; } main { margin-left: 0 !important; } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen antialiased">
+  <div id="nav-root"></div>
+  <main class="ml-0 lg:ml-[260px] min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 py-8 lg:px-10">
+
+      <!-- Welcome Banner -->
+      <div class="bg-gradient-to-r from-maestro/10 via-orange-500/5 to-transparent border border-maestro/20 rounded-xl p-8 mb-8">
+        <div class="text-maestro text-xs font-mono uppercase tracking-wider mb-2">March 25, 2026 -- Day 1 Knowledge Transfer</div>
+        <h1 class="text-slate-100 text-3xl font-bold font-display mb-3">Welcome to Maestro</h1>
+        <p class="text-slate-400 text-base mb-4">Welcome to the team. This guide covers everything you need to know about what Maestro is, who we build for, and how the platform works.</p>
+        <div class="flex flex-wrap gap-3" id="member-badges"></div>
+        <script>
+          document.getElementById('member-badges').innerHTML = DATA.meta.newMembers.map(m =>
+            `<span class="text-xs px-3 py-1 rounded-full border border-maestro/30 bg-maestro/10 text-orange-400">${m.name} -- ${m.role}</span>`
+          ).join('') + `<span class="text-xs px-3 py-1 rounded-full border border-slate-700 bg-slate-800 text-slate-400">Facilitated by ${DATA.meta.facilitator}</span>`;
+        </script>
+      </div>
+
+      <!-- What is Maestro -->
+      <div id="what-is-maestro"></div>
+      <script>
+        document.getElementById('what-is-maestro').innerHTML = Theme.heading('What is Maestro?', DATA.company.tagline);
+      </script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+          <h3 class="text-slate-100 font-semibold text-sm mb-3">The Problem</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Affluent travelers have millions of loyalty points but struggle to find and book premium award seats. Manual search takes 10+ hours per trip across 10+ airline programs. Award availability is scarce (only 5-15% of seats), phantom availability causes frustration, and complex routing rules make optimization nearly impossible without expert help.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+          <h3 class="text-slate-100 font-semibold text-sm mb-3">The Solution</h3>
+          <p class="text-slate-400 text-sm leading-relaxed mb-3" id="solution-desc"></p>
+          <div class="text-xs text-slate-500 space-y-1">
+            <div><span class="text-slate-400 font-medium">Target:</span> <span id="audience"></span></div>
+            <div><span class="text-slate-400 font-medium">Positioning:</span> <span id="positioning"></span></div>
+            <div><span class="text-slate-400 font-medium">Status:</span> <span class="text-green-400" id="status"></span></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        document.getElementById('solution-desc').textContent = DATA.company.description;
+        document.getElementById('audience').textContent = DATA.company.audience;
+        document.getElementById('positioning').textContent = DATA.company.positioning;
+        document.getElementById('status').textContent = DATA.company.status;
+      </script>
+
+      <!-- End-to-End Flow -->
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-6 mb-8">
+        <h3 class="text-slate-100 font-semibold text-sm mb-1">How Maestro Works</h3>
+        <p class="text-slate-500 text-xs mb-5" id="flow-rule"></p>
+        <div class="flex flex-wrap items-center justify-center gap-2" id="flow-diagram"></div>
+      </div>
+      <script>
+        document.getElementById('flow-rule').textContent = DATA.company.workflow.summary;
+        const flowEl = document.getElementById('flow-diagram');
+        flowEl.innerHTML = DATA.company.workflow.steps.map((s, i) => {
+          const isLast = i === DATA.company.workflow.steps.length - 1;
+          return `
+            <div class="flex items-center gap-2">
+              <div class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-center min-w-[120px]">
+                <div class="text-slate-200 text-sm font-medium">${s.label}</div>
+                <div class="text-slate-500 text-[10px] mt-0.5">${s.detail}</div>
+              </div>
+              ${!isLast ? '<svg class="w-5 h-5 text-maestro shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>' : ''}
+            </div>`;
+        }).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Key Numbers -->
+      <div id="stats-heading"></div>
+      <script>document.getElementById('stats-heading').innerHTML = Theme.heading('Key Numbers');</script>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8" id="stats-grid"></div>
+      <script>
+        const stats = [
+          { label: 'Team Members', value: '30+' },
+          { label: 'Continents', value: '5' },
+          { label: 'Products', value: '5' },
+          { label: 'Ops Staff', value: '20+' },
+          { label: 'SLA Target', value: '24hr' }
+        ];
+        document.getElementById('stats-grid').innerHTML = stats.map(s => Theme.stat(s.label, s.value)).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Session Modules -->
+      <div id="modules-heading"></div>
+      <script>document.getElementById('modules-heading').innerHTML = Theme.heading('Session Modules', 'Click any module to explore');</script>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="modules-grid"></div>
+      <script>
+        const modules = [
+          { href: 'product.html', title: 'Product Ecosystem', desc: '5 products, tech stack, how they connect', num: '01' },
+          { href: 'domain.html', title: 'Domain Knowledge', desc: 'Luxury travel, points, competitors, glossary', num: '02' },
+          { href: 'team.html', title: 'Team & Org', desc: '30+ people, 6 departments, timezones', num: '03' },
+          { href: 'journeys.html', title: 'User Journeys', desc: 'Client flow, ops pipeline, trip lifecycle', num: '04' },
+          { href: 'roadmap.html', title: 'Current State', desc: 'Challenges, roadmap, where you fit in', num: '05' },
+        ];
+        document.getElementById('modules-grid').innerHTML = modules.map(m => `
+          <a href="${m.href}" class="bg-slate-900 border border-slate-800 rounded-lg p-5 hover:border-maestro/40 hover:bg-slate-800/30 transition-all group">
+            <div class="text-maestro/40 text-xs font-mono mb-2">${m.num}</div>
+            <h3 class="text-slate-100 font-semibold text-sm group-hover:text-maestro transition-colors">${m.title}</h3>
+            <p class="text-slate-500 text-xs mt-1">${m.desc}</p>
+          </a>
+        `).join('');
+      </script>
+
+    </div>
+  </main>
+</body>
+</html>

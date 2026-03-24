@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Journeys -- Maestro KT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <script src="data.js"></script>
+  <script>window.CURRENT_PAGE = 'journeys';</script>
+  <script src="nav.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    @media print { #sidebar, #nav-toggle, #nav-overlay { display: none !important; } main { margin-left: 0 !important; } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen antialiased">
+  <div id="nav-root"></div>
+  <main class="ml-0 lg:ml-[260px] min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 py-8 lg:px-10">
+
+      <div id="h1"></div>
+      <script>document.getElementById('h1').innerHTML = Theme.heading('User Journeys', 'How clients, ops, and the platform interact end-to-end');</script>
+
+      <!-- Client Journey -->
+      <div id="h2"></div>
+      <script>document.getElementById('h2').innerHTML = Theme.heading('Client Journey', '12 steps from discovery to post-trip follow-up');</script>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-6 mb-8">
+        <div class="space-y-0" id="client-journey"></div>
+      </div>
+      <script>
+        const ownerColors = { Marketing: 'blue', 'System / Ops': 'slate', 'Travel Advisory': 'purple', 'Ops / Automations': 'green', Client: 'amber', 'AI Agents': 'blue', 'Concierge Ops': 'green', 'Ops / TA': 'green', Ops: 'green' };
+        document.getElementById('client-journey').innerHTML = DATA.clientJourney.map((s, i) => {
+          const isLast = i === DATA.clientJourney.length - 1;
+          return `
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full bg-maestro/20 border border-maestro/30 flex items-center justify-center text-maestro text-xs font-bold shrink-0">${s.step}</div>
+                ${!isLast ? '<div class="w-px flex-1 bg-slate-800 my-1"></div>' : ''}
+              </div>
+              <div class="pb-4 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-100 text-sm font-medium">${s.label}</span>
+                  ${Theme.badge(s.owner, ownerColors[s.owner] || 'slate')}
+                </div>
+                <div class="text-slate-500 text-xs mt-0.5">${s.description}</div>
+              </div>
+            </div>`;
+        }).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Member Travel Pipeline -->
+      <div id="h3"></div>
+      <script>document.getElementById('h3').innerHTML = Theme.heading('Member Travel Pipeline (SOP)', 'The official 12-stage pipeline from Notion -- how ops manages every trip');</script>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-4" id="pipeline-table"></div>
+      <script>
+        const pipelineRows = DATA.travelPipeline.filter(s => !s.special).map(s => [
+          `<span class="font-mono text-xs text-maestro">${s.num}</span>`,
+          `<span class="font-medium text-slate-200">${s.stage}</span>`,
+          Theme.badge(s.owner, s.owner.includes('TA') ? 'purple' : s.owner.includes('Member') ? 'amber' : 'green'),
+          `<span class="text-xs">${s.description}</span>`,
+          `<span class="text-xs text-slate-500">${s.exitCriteria}</span>`
+        ]);
+        document.getElementById('pipeline-table').innerHTML = Theme.table(
+          ['#', 'Stage', 'Owner', 'Description', 'Exit Criteria'],
+          pipelineRows
+        );
+      </script>
+
+      <!-- Special states -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4">
+          <div class="text-amber-400 text-sm font-semibold mb-1">On Hold</div>
+          <div class="text-slate-400 text-xs">Trip temporarily paused (awaiting member input or external dependency). Reason must be documented. Owner: Ops.</div>
+        </div>
+        <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+          <div class="text-red-400 text-sm font-semibold mb-1">Canceled</div>
+          <div class="text-slate-400 text-xs">Trip canceled by member or due to external factors. Document reason and close. Owner: Ops.</div>
+        </div>
+      </div>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Ownership Principles -->
+      <div id="h4"></div>
+      <script>document.getElementById('h4').innerHTML = Theme.heading('Ownership Principles', 'How TA and Ops share responsibility for each trip');</script>
+
+      <div class="space-y-3 mb-8" id="principles"></div>
+      <script>
+        document.getElementById('principles').innerHTML = DATA.ownershipPrinciples.map(p => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+            <div class="text-slate-100 text-sm font-semibold mb-1">${p.title}</div>
+            <div class="text-slate-400 text-xs">${p.description}</div>
+          </div>
+        `).join('');
+      </script>
+
+      <hr class="border-slate-800 my-8">
+
+      <!-- Trip Page Components -->
+      <div id="h5"></div>
+      <script>document.getElementById('h5').innerHTML = Theme.heading('What a Trip Page Contains', '8 components of a Notion trip page -- the deliverable clients see');</script>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" id="trip-components"></div>
+      <script>
+        document.getElementById('trip-components').innerHTML = DATA.tripPageComponents.map((c, i) => `
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+            <div class="text-maestro text-xs font-mono mb-1">${String(i+1).padStart(2, '0')}</div>
+            <div class="text-slate-100 text-sm font-medium">${c.name}</div>
+            <div class="text-slate-500 text-[10px] mt-1">${c.description}</div>
+          </div>
+        `).join('');
+      </script>
+
+      <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-sm text-slate-400">
+        All trip page content is generated and maintained by AI agents, then verified by ops before delivery to the client. Notion is the system of record -- it's where the structured output lives.
+      </div>
+
+    </div>
+  </main>
+</body>
+</html>
