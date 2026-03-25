@@ -23,8 +23,9 @@ function initNav() {
     localStorage.setItem('kt-visited', JSON.stringify(visited));
   }
   const visibleItems = NAV_ITEMS.filter(i => !i.hidden);
+  const visibleIds = visibleItems.map(i => i.id);
   const totalPages = visibleItems.length;
-  const visitedCount = visited.length;
+  const visitedCount = visited.filter(v => visibleIds.includes(v)).length;
 
   const navHtml = `
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-[260px] bg-slate-900 border-r border-slate-800 flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 -translate-x-full">
