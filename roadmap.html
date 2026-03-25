@@ -27,28 +27,6 @@
       <div id="h1"></div>
       <script>document.getElementById('h1').innerHTML = Theme.heading('Current State & Direction', 'Where the team is, what we\'re building, and where you fit in');</script>
 
-      <!-- Challenges -->
-      <div id="h2"></div>
-      <script>document.getElementById('h2').innerHTML = Theme.heading('Current Challenges', 'What the team is dealing with right now');</script>
-
-      <div class="space-y-4 mb-8" id="challenges"></div>
-      <script>
-        const cColors = { 'Being addressed': 'amber', 'Active monitoring': 'red', 'Process improvements underway': 'blue' };
-        document.getElementById('challenges').innerHTML = DATA.challenges.map(c => `
-          <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <h3 class="text-slate-100 font-semibold text-sm">${c.title}</h3>
-              ${Theme.badge(c.status, cColors[c.status] || 'slate')}
-            </div>
-            <p class="text-slate-400 text-sm mb-3">${c.description}</p>
-            <div class="text-slate-500 text-xs mb-1">Impact:</div>
-            <ul class="text-slate-400 text-xs space-y-0.5">${c.impact.map(i => `<li class="flex items-start gap-2"><span class="text-amber-400">-</span>${i}</li>`).join('')}</ul>
-          </div>
-        `).join('');
-      </script>
-
-      <hr class="border-slate-800 my-8">
-
       <!-- H1 Philosophy -->
       <div id="h3"></div>
       <script>document.getElementById('h3').innerHTML = Theme.heading('H1 2026 Philosophy');</script>
