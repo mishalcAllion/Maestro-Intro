@@ -116,7 +116,7 @@ const DATA = {
       icon: 'cpu',
       description: 'Trip drafting, hotel/flight search, nightly monitoring, auto-responses',
       users: 'System (automated)',
-      tech: 'GPT-4.1/4o, BullMQ, Redis',
+      tech: 'GPT-4.1 (primary), Gemini 2.0 (fallback), BullMQ, Redis',
       status: 'Active',
       details: [
         'Intent routing from client messages',
@@ -146,8 +146,9 @@ const DATA = {
       { name: 'Zustand', detail: 'State management, ~40% code reuse with web' }
     ],
     ai: [
-      { name: 'GPT-4.1 / GPT-4o', detail: 'Primary LLMs' },
-      { name: 'Claude 3, Gemini 2.0', detail: 'Fallbacks' },
+      { name: 'GPT-4.1', detail: 'Primary LLM -- in production for trip drafting, intent routing, auto-response' },
+      { name: 'Gemini 2.0', detail: 'Fallback only -- triggered if GPT-4.1 is unavailable or rate-limited' },
+      { name: 'Other models (Claude, GPT-4o, etc.)', detail: 'Implemented but NOT production-ready -- experimental / evaluation stage only' },
       { name: 'Planned: LangGraph, OpenAI Agents SDK', detail: 'Future agent framework' }
     ],
     travelApis: [
@@ -159,9 +160,9 @@ const DATA = {
 
   // === ENVIRONMENTS (Source: context/Workflows_and_Standards.md lines 163-167) ===
   environments: [
-    { name: 'Dev', description: 'Active development, unstable', owner: 'Prasanna' },
-    { name: 'Staging', description: 'QA and UAT testing', owner: 'Prasanna / Thilini' },
-    { name: 'Production', description: 'Live clients (AWS)', owner: 'Prasanna' }
+    { name: 'Dev', description: 'Active development, unstable', owner: 'Tharaka' },
+    { name: 'Staging', description: 'QA and UAT testing', owner: 'Tharaka / Thilini' },
+    { name: 'Production', description: 'Live clients (AWS)', owner: 'Tharaka' }
   ],
 
   // === DOMAIN KNOWLEDGE (Source: context/Domain_101_Luxury_Travel_Points.md) ===
@@ -174,7 +175,8 @@ const DATA = {
           'Dynamic pricing based on demand, route, season',
           'Availability generally abundant',
           'Earns loyalty points when flown'
-        ]
+        ],
+        example: 'NYC to London Business Class: ~$4,000-$8,000 cash. You pay full price but can get on any flight with seats remaining.'
       },
       award: {
         label: 'Award Tickets (Points)',
@@ -183,27 +185,31 @@ const DATA = {
           'Often fixed pricing in "award charts" (dynamic increasing)',
           'Availability severely constrained -- airlines release only 5-15% of seats',
           'Does NOT typically earn additional miles'
-        ]
+        ],
+        example: 'Same NYC to London Business Class: 50,000-70,000 miles (worth $2,500-$4,000+ in cash terms) -- but only if the airline releases award space, which may be zero on popular routes.'
       },
-      whyItMatters: 'Users have millions of points but struggle to find available award seats. The scarcity of award inventory is the core problem Maestro solves.'
+      whyItMatters: 'Maestro clients have millions of points sitting unused. The problem is not earning them -- it is knowing when and how to use them. A client with 500,000 Amex points could fly Business Class round-trip to Tokyo for "free" if Maestro finds the right award window. That is the core value proposition.'
     },
 
     cpm: {
       formula: 'CPM = (Cash Price of Ticket / Points Required) x 100',
-      example: { cashPrice: 5000, points: 80000, cpm: 6.25 },
+      example: { cashPrice: 5000, points: 80000, cpm: 6.25, explanation: '$5,000 ticket booked for 80,000 points = 6.25 cents per mile. The client "saved" $5,000 using points worth ~$800 at face value.' },
+      whyItMatters: 'CPM is how Maestro proves value. If a client earns 1c/point on spend but we redeem at 6c+, we just 6x their money. This is the number Sunthar tracks as the north star metric for Points Concierge.',
       benchmarks: [
-        { type: 'Domestic Economy', cpm: '1.0-1.5c', sentiment: 'Poor value' },
-        { type: 'International Economy', cpm: '1.5-2.5c', sentiment: 'Acceptable' },
-        { type: 'Business Class', cpm: '3.0-7.0c', sentiment: 'Good value' },
-        { type: 'First Class (Long-haul)', cpm: '6.0-15.0c', sentiment: 'Excellent value' }
+        { type: 'Domestic Economy', cpm: '1.0-1.5c', sentiment: 'Poor value', example: 'Using 15,000 miles for a $150 domestic flight -- barely better than buying cash' },
+        { type: 'International Economy', cpm: '1.5-2.5c', sentiment: 'Acceptable', example: '40,000 miles for a $700 transatlantic economy seat' },
+        { type: 'Business Class', cpm: '3.0-7.0c', sentiment: 'Good value', example: '70,000 miles for a $4,000 lie-flat seat -- this is where Maestro operates' },
+        { type: 'First Class (Long-haul)', cpm: '6.0-15.0c', sentiment: 'Excellent value', example: '88,000 ANA miles for a $10,000+ First Class suite -- the holy grail' }
       ]
     },
 
     transferPartners: {
       description: 'Credit card points (Amex MR, Chase UR) can be transferred to airline/hotel loyalty programs. Transfers are usually 1:1, instant to 24 hours, but irreversible.',
+      whyItMatters: 'Most clients do not know this exists. They book through the Amex travel portal at 1.25c/point. Maestro unlocks 4-8x more value by transferring to the right partner for the right route.',
+      example: 'Client has 200,000 Amex Membership Rewards. Through the portal: worth $2,500. Transferred to ANA miles and booked Lufthansa First Class: worth $12,000+ in flights. Same points, 5x the value.',
       comparison: [
-        { method: 'Amex/Chase Portal', cpm: '1.0-1.5c', flexibility: 'Limited to portal inventory' },
-        { method: 'Transfer to Partners', cpm: '2.0-10.0c+', flexibility: 'Full award chart access, premium cabins' }
+        { method: 'Amex/Chase Portal', cpm: '1.0-1.5c', flexibility: 'Limited to portal inventory', example: 'Book like a normal website, no transfers needed, but overpay in points' },
+        { method: 'Transfer to Partners', cpm: '2.0-10.0c+', flexibility: 'Full award chart access, premium cabins', example: 'Transfer Amex MR to ANA -> book Lufthansa First; or to Air Canada -> book United Business' }
       ],
       keyAdvantages: [
         'Higher redemption value: Business/First can yield 5-10c/point vs 1.25c through portals',
@@ -215,21 +221,24 @@ const DATA = {
 
     phantomAvailability: {
       definition: 'When an airline search engine shows award seats available, but they cannot actually be booked.',
+      whyItMatters: 'This is one of the most expensive failure modes for Maestro. If we tell a client "Business Class is available for 60,000 miles", they transfer points (irreversible), then the booking fails -- we have destroyed trust and real money. Our validation engine exists entirely to solve this.',
       causes: [
-        'Cache lag: airline systems show outdated inventory',
-        'Married segment logic: seat requires booking full journey',
-        'Partner sync issues: Airline A shows space on B that doesn\'t exist',
+        'Cache lag: airline systems show outdated inventory (seats sold seconds ago still show available)',
+        'Married segment logic: seat requires booking full journey, not just one leg',
+        'Partner sync issues: Airline A shows space on Airline B that does not exist',
         'Technical glitches in reservation platform',
         'Waitlisted seats displayed as "available"'
       ],
+      example: 'Seats.aero shows 2 Business Class awards on United NYC-London. Client transfers 120,000 Chase points to United (irreversible, takes 1 hour). We try to book -- "No availability." Points are gone. This is a phantom availability failure.',
       risk: 'User frustration, loss of trust, wasted irreversible point transfers',
       mitigation: 'Multi-source validation (check 2+ systems), pre-booking availability check, confidence score per result'
     },
 
     marriedSegments: {
       definition: 'Flight combinations where the airline only releases award space if you book the entire itinerary together, not individual legs.',
-      example: 'Searching NYC->London alone: No award space. Searching NYC->Dubai (via London): Award space available. Airline wants to fill London->Dubai leg.',
-      technicalImplication: 'Must query both individual legs AND full journey combinations. A simple A->B search may require checking A->C->B, A->D->C->B, etc.'
+      example: 'Client wants NYC->London. Searching NYC->London alone: zero award seats. Searching NYC->Dubai (with a London stopover): two Business Class awards available. The airline needs to fill the London->Dubai leg, so it only releases space as a package.',
+      whyItMatters: 'A naive search for "NYC to London" returns zero results and we tell the client there are no awards. A smart search finds the same seat by trying multi-city combinations. This is why the validation engine queries hundreds of route permutations, not just direct searches -- and why it is technically complex to build correctly.',
+      technicalImplication: 'Must query both individual legs AND full journey combinations. A simple A->B search may require checking A->C->B, A->D->C->B, etc. Yasiru owns the validation engine that handles this.'
     },
 
     competitors: [
@@ -238,25 +247,28 @@ const DATA = {
         type: 'DIY Search Aggregator',
         price: '$12-30/month',
         strengths: ['Comprehensive program coverage', 'Fast search results', 'Good for self-bookers'],
-        weaknesses: ['No booking automation', 'No concierge support', 'Limited validation (phantom common)', 'No monitoring']
+        weaknesses: ['No booking automation', 'No concierge support', 'Limited validation (phantom common)', 'No monitoring'],
+        example: 'A client uses Point.me to find a Business Class flight, sees it available, transfers 80,000 Chase points to United -- then spends 2 hours trying to book, fails due to phantom availability. They contact Maestro instead.'
       },
       {
         name: 'Seats.aero',
         type: 'Availability Alert Tool',
         price: '$5-15/month',
         strengths: ['Proactive monitoring (set and forget)', 'Good for flexible travelers', 'Affordable'],
-        weaknesses: ['Reactive not proactive', 'Limited route coverage', 'No multi-city support', 'No booking service']
+        weaknesses: ['Reactive not proactive', 'Limited route coverage', 'No multi-city support', 'No booking service'],
+        example: 'A client sets an alert for NYC->Tokyo Business Class. Seats.aero pings them at 3am when space opens. They still have to log in, evaluate, transfer points, and book manually -- Maestro does all of that for them.'
       },
       {
         name: 'Velocity Black',
         type: 'Ultra-Premium Concierge',
         price: '$3,000-10,000/year',
         strengths: ['Fully hands-off', 'Human expertise', 'Relationship-based inventory access'],
-        weaknesses: ['Extremely expensive', 'Opaque process', 'Slow (24-48 hours)', 'Limited to their partnerships']
+        weaknesses: ['Extremely expensive', 'Opaque process', 'Slow (24-48 hours)', 'Limited to their partnerships'],
+        example: 'Closest to Maestro in service model but 10x the price, no AI, and their concierge team does not specialize in points optimization. Maestro targets clients who want Velocity Black quality at a $500-1,500/year price point.'
       }
     ],
 
-    maestroPosition: 'The AI-powered concierge for points optimization -- combining the comprehensiveness of Point.me with the automation of Velocity Black, at a fraction of the cost.',
+    maestroPosition: 'The AI-powered concierge for points optimization -- combining the comprehensiveness of Point.me with the automation of Velocity Black, at a fraction of the cost. Why it matters: neither competitor does AI + human + validation in one product. That gap is Maestro\'s moat.',
 
     competitorMatrix: [
       { need: 'Search Automation', pointMe: true, velocityBlack: true, maestro: true },
@@ -269,22 +281,22 @@ const DATA = {
     ],
 
     glossary: [
-      { term: 'GDS', full: 'Global Distribution System', definition: 'Centralized reservation systems (Amadeus, Sabre, Travelport) used by travel agencies. Aggregates inventory from hundreds of airlines. Pros: single API. Cons: often lacks award inventory, delayed updates, expensive.' },
-      { term: 'Direct Connect', full: 'Airline Direct API', definition: 'API integration directly with an airline\'s reservation system. Real-time award availability, airline-specific features. Must integrate individually.' },
-      { term: 'PNR', full: 'Passenger Name Record', definition: 'Unique record in airline reservation system with all itinerary details: passenger names, flight segments, seats, tickets, 6-character booking reference.' },
-      { term: 'CPM', full: 'Cents Per Mile', definition: 'North star metric: (Cash Price / Points Required) x 100. Measures redemption value. Target: >4.0c for Maestro bookings.' },
-      { term: 'Open Jaw', full: 'Open Jaw Itinerary', definition: 'Return origin differs from outbound destination. Example: fly NYC->Paris, return Rome->NYC (travel Paris->Rome independently).' },
-      { term: 'Stopover', full: 'Extended Connection', definition: 'Deliberate stay >24 hours at a connection point. Rules vary by airline program (0 to unlimited allowed).' },
-      { term: 'YQ', full: 'Fuel Surcharge', definition: 'Fees imposed by airlines on award tickets beyond government taxes. Range from $0 (United, ANA) to $1,200+ (British Airways). Critically impacts true value.' },
-      { term: 'Phantom Availability', full: 'Ghost Inventory', definition: 'Award seats shown as available but cannot actually be booked. Causes: cache lag, married segments, partner sync. Maestro validates via 2+ sources.' },
-      { term: 'Married Segment', full: 'Linked Flight Segments', definition: 'Award space only released if full itinerary is booked together. Individual leg searches may show no availability.' }
+      { term: 'GDS', full: 'Global Distribution System', definition: 'Centralized reservation systems (Amadeus, Sabre, Travelport) used by travel agencies. Aggregates inventory from hundreds of airlines. Pros: single API. Cons: often lacks award inventory, delayed updates, expensive.', example: 'Why it matters: Maestro uses Amadeus for hotel search but cannot rely on GDS for award flights -- it does not see most award inventory.' },
+      { term: 'Direct Connect', full: 'Airline Direct API', definition: 'API integration directly with an airline\'s reservation system. Real-time award availability, airline-specific features. Must integrate individually.', example: 'Why it matters: Seats.aero and Roame give Maestro near-real-time award availability without the GDS gap. Each airline has slightly different data.' },
+      { term: 'PNR', full: 'Passenger Name Record', definition: 'Unique record in airline reservation system with all itinerary details: passenger names, flight segments, seats, tickets, 6-character booking reference.', example: 'Example: "ABCXYZ" is the PNR. When ops confirms a booking, they store the PNR in Notion so the client can look it up at check-in.' },
+      { term: 'CPM', full: 'Cents Per Mile', definition: 'North star metric: (Cash Price / Points Required) x 100. Measures redemption value. Target: >4.0c for Maestro bookings.', example: 'Example: $6,000 business class ticket booked for 80,000 miles = 7.5c/mile. The client used points "worth" $800 to save $6,000.' },
+      { term: 'Open Jaw', full: 'Open Jaw Itinerary', definition: 'Return origin differs from outbound destination. Example: fly NYC->Paris, return Rome->NYC (travel Paris->Rome independently).', example: 'Why it matters: Maestro clients often want this for European trips. Award search must handle it -- not all engines support open jaw queries.' },
+      { term: 'Stopover', full: 'Extended Connection', definition: 'Deliberate stay >24 hours at a connection point. Rules vary by airline program (0 to unlimited allowed).', example: 'Example: Singapore Airlines allows 1 free stopover in Singapore on round-trip awards. A Maestro client flying NYC->Bali can spend 3 days in Singapore at no extra miles cost.' },
+      { term: 'YQ', full: 'Fuel Surcharge', definition: 'Fees imposed by airlines on award tickets beyond government taxes. Range from $0 (United, ANA) to $1,200+ (British Airways). Critically impacts true value.', example: 'Example: Booking Lufthansa Business through Lufthansa miles costs $900 in YQ fees. Booking the same flight through United miles costs $5.60. Same seat, same flight -- $894 difference in fees.' },
+      { term: 'Phantom Availability', full: 'Ghost Inventory', definition: 'Award seats shown as available but cannot actually be booked. Causes: cache lag, married segments, partner sync. Maestro validates via 2+ sources.', example: 'Example: A client sees "2 seats available" on our search. They ask us to proceed. We check a second source -- seats are gone. We catch it before the irreversible transfer.' },
+      { term: 'Married Segment', full: 'Linked Flight Segments', definition: 'Award space only released if full itinerary is booked together. Individual leg searches may show no availability.', example: 'Example: United shows zero NYC->London awards. But NYC->Frankfurt->London (same price) has 2 seats. The Frankfurt leg is the bait -- United needs to fill it.' }
     ],
 
     successMetrics: [
-      { metric: 'CPM Delivered', target: '>4.0c', description: 'Average CPM of booked awards' },
-      { metric: 'Booking Success Rate', target: '>60%', description: 'Searches resulting in confirmed bookings' },
-      { metric: 'Phantom Avoidance', target: '>95%', description: 'Displayed results that successfully book' },
-      { metric: 'Time Saved', target: '8+ hours/trip', description: 'Hours saved vs manual search' }
+      { metric: 'CPM Delivered', target: '>4.0c', description: 'Average CPM of booked awards', example: 'If a client redeems 100,000 points and we hit 5c CPM, they effectively got $5,000 in flights. This is what Maestro charges a premium for.' },
+      { metric: 'Booking Success Rate', target: '>60%', description: 'Searches resulting in confirmed bookings', example: 'If we present 10 itineraries and 6 result in confirmed bookings, we are hitting target. Low rate = too many phantom results or mismatched expectations.' },
+      { metric: 'Phantom Avoidance', target: '>95%', description: 'Displayed results that successfully book', example: 'Of every 100 award options we show clients, 95+ must be bookable. Any lower and clients start transferring points to dead ends.' },
+      { metric: 'Time Saved', target: '8+ hours/trip', description: 'Hours saved vs manual search', example: 'A client manually searching Business Class awards across 5 programs for a complex trip could spend 10-15 hours. Maestro does it in minutes.' }
     ]
   },
 
@@ -295,18 +307,20 @@ const DATA = {
     { name: 'Travel Advisory (TA)', lead: 'Nina Price / Courtney / Kelly', focus: 'Plans the trip strategically (destination, structure, pacing)', location: 'Austin, TX' },
     { name: 'Concierge Ops (CO)', lead: 'Belle Zandi (Manila lead)', focus: 'Executes the trip (bookings, vendor coordination, live support)', location: 'Manila + Nairobi' },
     { name: 'Points & Cards Strategy (PCS)', lead: 'Matt Jamele', focus: 'Loyalty optimization, points audits, card strategy', location: 'Austin + Manila' },
-    { name: 'Product & Engineering', lead: 'Sunthar (CPO)', focus: 'Builds the platform; Mishal coordinates this function', location: 'Colombo + Canada' }
+    { name: 'Product & Engineering', lead: 'Sunthar (Points + Mobile) / Nirav (Trips + Command Center)', focus: 'Builds the platform; Mishal coordinates this function', location: 'Colombo + Canada' }
   ],
 
-  // === ENGINEERING TEAM (Source: context/Team_Structure.md lines 42-84) ===
+  // === ENGINEERING TEAM ===
   engineeringTeam: [
     { name: 'Shashila Heshan', email: 'shashila@askmaestro.com', role: 'Full-Stack Dev', focus: 'Command Center, AI auto-response, integrations', location: 'Colombo, Sri Lanka', tz: 'GMT+5:30', hours: '44-58 hrs/week', isNew: false },
     { name: 'Kalpa Thathsara', email: 'kalpa@askmaestro.com', role: 'Mobile Backend Dev', focus: 'Mobile app development, voice-to-text, flight APIs', location: 'Colombo, Sri Lanka', tz: 'GMT+5:30', hours: '32-43 hrs/week', isNew: false },
-    { name: 'Prasanna', email: 'prasanna@askmaestro.com', role: 'DevOps Engineer', focus: 'AWS infrastructure, environment deployments', location: 'Colombo, Sri Lanka', tz: 'GMT+5:30', hours: '32-43 hrs/week', isNew: false },
+    { name: 'Tharaka', email: '', role: 'Software Architect / Infrastructure', focus: 'System architecture, repository patterns, AWS infrastructure', location: 'Colombo, Sri Lanka', tz: 'GMT+5:30', hours: 'TBD', isNew: false },
     { name: 'Yasiru Nilan', email: '', role: 'Validation Engineer', focus: 'Airline validation engine, multi-provider validation', location: 'Colombo, Sri Lanka', tz: 'GMT+5:30', hours: '44-58 hrs/week', isNew: false },
-    { name: 'Waruna Samarasinghe', email: '', role: 'Mobile UI/UX Dev', focus: 'Mobile UI, voice assistant, booking flow, onboarding screens', location: 'Canada', tz: 'GMT-6', hours: '52-67 hrs/week', burnoutRisk: true, isNew: false },
+    { name: 'Waruna Samarasinghe', email: '', role: 'Mobile UI/UX Dev', focus: 'Mobile UI, voice assistant, booking flow, onboarding screens', location: 'Canada', tz: 'GMT-6', hours: 'TBD', isNew: false },
     { name: 'Thiranjaya Munasinghe', email: '', role: 'Flight Module Dev', focus: 'Flight module, Command Center, airline validation', location: 'Colombo, Sri Lanka', tz: 'GMT+5:30', hours: '42-54 hrs/week', isNew: false },
-    { name: 'Juan', email: 'juan@askmaestro.com', role: 'Mobile Design & Dev', focus: 'Navan-inspired design system, mobile UI', location: 'TBD', tz: 'TBD', hours: 'TBD', isNew: false },
+    { name: 'Thusal', email: '', role: 'Mobile App Dev', focus: 'Mobile app development', location: 'TBD', tz: 'TBD', hours: 'TBD', isNew: false },
+    { name: 'Pasindu', email: '', role: 'Software Engineer', focus: 'TBD', location: 'TBD', tz: 'TBD', hours: 'TBD', isNew: false },
+    { name: 'Juan', email: 'juan@askmaestro.com', role: 'Mobile Design & Dev', focus: 'Navan-inspired design system, mobile UI', location: 'TBD', tz: 'TBD', hours: 'TBD', isNew: false, isExternal: true },
     { name: 'Thilini', email: 'thilini@askmaestro.com', role: 'QA', focus: 'UAT, mobile QA, regression testing, staging validation', location: 'TBD', tz: 'TBD', hours: 'TBD', isNew: false },
     { name: 'New Member 1', email: '', role: 'Role TBD', focus: 'TBD -- to be assigned during onboarding', location: 'TBD', tz: 'TBD', hours: '--', isNew: true, company: 'Allion Technologies' },
     { name: 'New Member 2', email: '', role: 'Role TBD', focus: 'TBD -- to be assigned during onboarding', location: 'TBD', tz: 'TBD', hours: '--', isNew: true, company: 'Allion Technologies' }
@@ -314,8 +328,8 @@ const DATA = {
 
   // === STAKEHOLDERS (Source: context/Your_Role_Profile.md + Team_Structure.md) ===
   stakeholders: [
-    { name: 'Sunthar Premakumar', role: 'CPO', priority: 'Primary day-to-day stakeholder', expects: 'Weekly sprint reports, PRDs, clear visibility', location: 'Austin, TX' },
-    { name: 'Nirav Amin', role: 'Product Manager', priority: 'Collaborates with Sunthar on product direction', expects: 'Product specs, requirements clarity', location: 'Austin, TX' },
+    { name: 'Sunthar Premakumar', role: 'Product Manager -- Points Concierge + Mobile App', priority: 'Primary day-to-day stakeholder', expects: 'Weekly sprint reports, PRDs, clear visibility', location: 'Austin, TX' },
+    { name: 'Nirav Amin', role: 'Product Manager -- Trips + Command Center', priority: 'Owns Trip Concierge and Command Center product direction', expects: 'Product specs, requirements clarity', location: 'Austin, TX' },
     { name: 'Prahar Shah', role: 'CEO', priority: 'Final decision maker', expects: 'Active in Slack; budget, resources, strategic direction', location: 'Austin, TX' },
     { name: 'Rushanthi', role: 'Head of Software Delivery (Allion)', priority: 'Mishal\'s direct manager at Allion', expects: 'Clear value delivery, billability evidence', location: 'Allion Technologies' }
   ],
@@ -324,7 +338,7 @@ const DATA = {
   geography: [
     { region: 'Austin, TX (HQ)', team: 'Leadership, OMX, Travel Advisory, Points & Cards', people: 'Prahar, Sunthar, Shaloo, Matt, Nina, Courtney, Kelly, Sejal', tz: 'CST (GMT-6)', flag: 'US' },
     { region: 'Manila, Philippines', team: 'Concierge Ops', people: 'Belle + 12 Concierge Ops', tz: 'GMT+8', flag: 'PH' },
-    { region: 'Colombo, Sri Lanka', team: 'Engineering', people: 'Shashila, Thiranjaya, Kalpa, Prasanna, Yasiru', tz: 'GMT+5:30', flag: 'LK' },
+    { region: 'Colombo, Sri Lanka', team: 'Engineering', people: 'Shashila, Kalpa, Tharaka, Yasiru, Thiranjaya, Thusal, Pasindu', tz: 'GMT+5:30', flag: 'LK' },
     { region: 'Canada', team: 'Engineering (Mobile UI)', people: 'Waruna', tz: 'GMT-6', flag: 'CA' },
     { region: 'Nairobi, Kenya', team: 'Ops Support', people: 'Prudence, Christine', tz: 'GMT+3', flag: 'KE' }
   ],
@@ -435,7 +449,7 @@ const DATA = {
     naming: 'Cycle 1, Cycle 2, Cycle 3...',
     statuses: ['Backlog', 'Ready for Development', 'Dev In Progress', 'Done', 'Released'],
     tools: 'Linear (task management), Slack (communication), Notion (system of record), GitHub (code), Figma (design)',
-    reporting: 'Weekly Monday updates to Sunthar (CPO)',
+    reporting: 'Weekly Monday updates to Sunthar (PM -- Points + Mobile)',
     baseline: '40 hrs/week sustainable target',
     bugSeverity: ['S1-Critical (P0, breaks production)', 'S2-Moderate', 'S3-Minor'],
     dod: [

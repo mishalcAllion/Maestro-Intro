@@ -44,29 +44,26 @@
 
       <!-- Engineering Team -->
       <div id="h2"></div>
-      <script>document.getElementById('h2').innerHTML = Theme.heading('Engineering Team', 'Your direct team -- 8 engineers + 2 QA');</script>
+      <script>document.getElementById('h2').innerHTML = Theme.heading('Engineering Team', 'Your direct team -- engineers + QA');</script>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="eng-table"></div>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-4" id="eng-table"></div>
       <script>
         document.getElementById('eng-table').innerHTML = Theme.table(
           ['Name', 'Role', 'Focus Area', 'Location', 'TZ', 'Hrs/Week'],
           DATA.engineeringTeam.map(m => [
-            m.isNew ? `<span class="text-maestro font-semibold">${m.name}</span> ${Theme.badge('NEW', 'maestro')}` : (m.burnoutRisk ? `${m.name} ${Theme.badge('High Load', 'red')}` : m.name),
+            m.isNew
+              ? `<span class="text-maestro font-semibold">${m.name}</span> ${Theme.badge('NEW', 'maestro')}`
+              : (m.isExternal ? `${m.name} ${Theme.badge('External', 'blue')}` : m.name),
             m.role,
             `<span class="text-xs">${m.focus}</span>`,
             m.location,
             `<span class="font-mono text-xs">${m.tz}</span>`,
             m.hours
           ]),
-          { highlightFn: (_, i) => DATA.engineeringTeam[i].isNew ? 'bg-maestro/5' : (DATA.engineeringTeam[i].burnoutRisk ? 'bg-red-500/5' : '') }
+          { highlightFn: (_, i) => DATA.engineeringTeam[i].isNew ? 'bg-maestro/5' : '' }
         );
       </script>
-
-      <!-- Team Health Note -->
-      <div class="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 mb-8">
-        <div class="text-amber-400 text-xs font-semibold mb-1">Team Health Note</div>
-        <div class="text-slate-400 text-sm">Sustainable baseline is 40 hrs/week. Current team averages 50-67 hrs/week. Waruna (Canada, mobile UI) at 52-67 hrs/week represents the highest burnout risk. Sprint capacity planning uses the 40hr baseline, not actuals.</div>
-      </div>
+      <div class="text-slate-600 text-xs mb-8 px-1">External = contractor, not direct Allion/Maestro headcount. Sprint capacity baseline is 40 hrs/week.</div>
 
       <hr class="border-slate-800 my-8">
 

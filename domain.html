@@ -17,6 +17,10 @@
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     @media print { #sidebar, #nav-toggle, #nav-overlay { display: none !important; } main { margin-left: 0 !important; } }
+    .example-box { background: rgba(255,94,50,0.04); border: 1px solid rgba(255,94,50,0.15); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+    .example-label { font-size: 10px; font-weight: 600; color: #ff5e32; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .why-box { background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+    .why-label { font-size: 10px; font-weight: 600; color: #818cf8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-300 font-sans min-h-screen antialiased">
@@ -41,6 +45,7 @@
           <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
             <h3 class="text-slate-100 font-semibold text-sm mb-3">${t.label}</h3>
             <ul class="text-slate-400 text-sm space-y-1.5">${t.points.map(p => `<li class="flex items-start gap-2"><span class="text-maestro">-</span>${p}</li>`).join('')}</ul>
+            ${t.example ? `<div class="example-box"><div class="example-label">Example</div><div class="text-slate-400 text-xs">${t.example}</div></div>` : ''}
           </div>`).join('');
         document.getElementById('why-matters').textContent = d.revenueVsAward.whyItMatters;
       </script>
@@ -54,15 +59,17 @@
       <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-4">
         <div class="font-mono text-sm text-slate-300 mb-3" id="cpm-formula"></div>
         <div class="bg-slate-800 rounded p-3 text-sm text-slate-400" id="cpm-example"></div>
+        <div class="why-box mt-3" id="cpm-why"></div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden mb-8" id="cpm-table"></div>
       <script>
         document.getElementById('cpm-formula').textContent = d.cpm.formula;
         const ex = d.cpm.example;
-        document.getElementById('cpm-example').innerHTML = `Example: Cash price $${ex.cashPrice.toLocaleString()} / ${ex.points.toLocaleString()} points = <span class="text-maestro font-semibold">${ex.cpm}c per mile</span>`;
+        document.getElementById('cpm-example').innerHTML = `<span class="text-slate-500 text-xs uppercase font-semibold">Example: </span>${ex.explanation}`;
+        document.getElementById('cpm-why').innerHTML = `<div class="why-label">Why This Matters</div><div class="text-slate-400 text-xs">${d.cpm.whyItMatters}</div>`;
         document.getElementById('cpm-table').innerHTML = Theme.table(
-          ['Redemption Type', 'Typical CPM', 'Sentiment'],
-          d.cpm.benchmarks.map(b => [b.type, b.cpm, b.sentiment]),
+          ['Redemption Type', 'Typical CPM', 'Sentiment', 'Example'],
+          d.cpm.benchmarks.map(b => [b.type, b.cpm, b.sentiment, `<span class="text-slate-500 text-xs">${b.example}</span>`]),
           { highlightFn: (row) => row[2] === 'Excellent value' ? 'bg-green-500/5' : '' }
         );
       </script>
@@ -73,18 +80,22 @@
       <div id="h4"></div>
       <script>document.getElementById('h4').innerHTML = Theme.heading('Transfer Partners', 'Why transferring points beats booking through portals');</script>
       <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-4">
-        <p class="text-slate-400 text-sm mb-4" id="tp-desc"></p>
+        <p class="text-slate-400 text-sm mb-3" id="tp-desc"></p>
+        <div class="example-box mb-3" id="tp-example"></div>
         <div id="tp-table"></div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 mb-8">
         <h4 class="text-slate-100 text-sm font-semibold mb-3">Key Advantages of Transferring</h4>
         <ul class="text-slate-400 text-sm space-y-1.5" id="tp-advantages"></ul>
+        <div class="why-box mt-4" id="tp-why"></div>
       </div>
       <script>
         document.getElementById('tp-desc').textContent = d.transferPartners.description;
+        document.getElementById('tp-example').innerHTML = `<div class="example-label">Example</div><div class="text-slate-400 text-xs">${d.transferPartners.example}</div>`;
+        document.getElementById('tp-why').innerHTML = `<div class="why-label">Why This Matters</div><div class="text-slate-400 text-xs">${d.transferPartners.whyItMatters}</div>`;
         document.getElementById('tp-table').innerHTML = Theme.table(
-          ['Booking Method', 'CPM Value', 'Flexibility'],
-          d.transferPartners.comparison.map(c => [c.method, c.cpm, c.flexibility])
+          ['Booking Method', 'CPM Value', 'Flexibility', 'Example'],
+          d.transferPartners.comparison.map(c => [c.method, c.cpm, c.flexibility, `<span class="text-slate-500 text-xs">${c.example}</span>`])
         );
         document.getElementById('tp-advantages').innerHTML = d.transferPartners.keyAdvantages.map(a => `<li class="flex items-start gap-2"><span class="text-maestro">-</span>${a}</li>`).join('');
       </script>
@@ -99,23 +110,29 @@
         <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
           <h3 class="text-slate-100 font-semibold text-sm mb-2">Phantom Availability</h3>
           <p class="text-slate-400 text-sm mb-3" id="phantom-def"></p>
+          <div class="example-box mb-3" id="phantom-example"></div>
           <div class="text-slate-500 text-xs mb-2">Common causes:</div>
           <ul class="text-slate-400 text-sm space-y-1" id="phantom-causes"></ul>
           <div class="mt-3 bg-red-500/5 border border-red-500/20 rounded p-2 text-xs text-red-400" id="phantom-risk"></div>
+          <div class="why-box mt-3" id="phantom-why"></div>
         </div>
         <div class="bg-slate-900 border border-slate-800 rounded-lg p-5">
           <h3 class="text-slate-100 font-semibold text-sm mb-2">Married Segments</h3>
           <p class="text-slate-400 text-sm mb-3" id="married-def"></p>
-          <div class="bg-slate-800 rounded p-3 text-xs text-slate-400 mb-3" id="married-example"></div>
-          <div class="text-slate-500 text-xs" id="married-tech"></div>
+          <div class="example-box mb-3" id="married-example-box"></div>
+          <div class="why-box mt-3" id="married-why"></div>
+          <div class="text-slate-500 text-xs mt-3" id="married-tech"></div>
         </div>
       </div>
       <script>
         document.getElementById('phantom-def').textContent = d.phantomAvailability.definition;
+        document.getElementById('phantom-example').innerHTML = `<div class="example-label">Real-world example</div><div class="text-slate-400 text-xs">${d.phantomAvailability.example}</div>`;
         document.getElementById('phantom-causes').innerHTML = d.phantomAvailability.causes.map(c => `<li class="flex items-start gap-2"><span class="text-red-400">-</span>${c}</li>`).join('');
         document.getElementById('phantom-risk').textContent = 'Mitigation: ' + d.phantomAvailability.mitigation;
+        document.getElementById('phantom-why').innerHTML = `<div class="why-label">Why This Matters</div><div class="text-slate-400 text-xs">${d.phantomAvailability.whyItMatters}</div>`;
         document.getElementById('married-def').textContent = d.marriedSegments.definition;
-        document.getElementById('married-example').textContent = d.marriedSegments.example;
+        document.getElementById('married-example-box').innerHTML = `<div class="example-label">Example</div><div class="text-slate-400 text-xs">${d.marriedSegments.example}</div>`;
+        document.getElementById('married-why').innerHTML = `<div class="why-label">Why This Matters</div><div class="text-slate-400 text-xs">${d.marriedSegments.whyItMatters}</div>`;
         document.getElementById('married-tech').textContent = d.marriedSegments.technicalImplication;
       </script>
 
@@ -135,6 +152,7 @@
             <ul class="text-slate-400 text-xs space-y-0.5">${c.strengths.map(s => `<li>+ ${s}</li>`).join('')}</ul>
             <div class="text-red-400 text-xs mt-2 mb-1">Weaknesses:</div>
             <ul class="text-slate-400 text-xs space-y-0.5">${c.weaknesses.map(w => `<li>- ${w}</li>`).join('')}</ul>
+            ${c.example ? `<div class="example-box"><div class="example-label">Example</div><div class="text-slate-400 text-xs">${c.example}</div></div>` : ''}
           </div>
         `).join('');
       </script>
@@ -160,13 +178,18 @@
       <!-- Success Metrics -->
       <div id="h7"></div>
       <script>document.getElementById('h7').innerHTML = Theme.heading('Success Metrics');</script>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" id="metrics-grid"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8" id="metrics-grid"></div>
       <script>
         document.getElementById('metrics-grid').innerHTML = DATA.domain.successMetrics.map(m => `
-          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 text-center">
-            <div class="text-maestro text-lg font-bold font-display">${m.target}</div>
-            <div class="text-slate-300 text-xs font-medium mt-1">${m.metric}</div>
-            <div class="text-slate-500 text-[10px] mt-0.5">${m.description}</div>
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="text-maestro text-xl font-bold font-display">${m.target}</div>
+              <div>
+                <div class="text-slate-300 text-sm font-medium">${m.metric}</div>
+                <div class="text-slate-500 text-xs">${m.description}</div>
+              </div>
+            </div>
+            ${m.example ? `<div class="example-box"><div class="example-label">Why it matters</div><div class="text-slate-400 text-xs">${m.example}</div></div>` : ''}
           </div>
         `).join('');
       </script>
@@ -181,7 +204,7 @@
         document.getElementById('glossary').innerHTML = DATA.domain.glossary.map(g =>
           Theme.collapsible(
             `<span class="font-mono text-maestro mr-2">${g.term}</span> <span class="text-slate-400">${g.full}</span>`,
-            g.definition
+            g.definition + (g.example ? `<div class="example-box mt-2"><div class="example-label">Context</div><div class="text-slate-400 text-xs">${g.example}</div></div>` : '')
           )
         ).join('');
       </script>
